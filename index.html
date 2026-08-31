@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 Link Pro 4.0 - Bảo mật cao</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, #0a0f1e, #020408);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .card {
+            background: rgba(22, 34, 50, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 28px 22px;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a2a3f;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #f5c542;
+            border-left: 3px solid #f5c542;
+            margin-bottom: 25px;
+        }
+        .badge {
+            background: #ff4d6a;
+            color: #fff;
+            padding: 3px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 15px #ff4d6a55;
+        }
+        .step-visual {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .step-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1e3145;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6a7f99;
+            font-weight: bold;
+            font-size: 13px;
+            border: 2px solid #2a4055;
+            transition: 0.4s;
+            z-index: 2;
+        }
+        .step-dot.active {
+            background: #f5c542;
+            border-color: #f5c542;
+            color: #0a0f1e;
+            box-shadow: 0 0 25px #f5c542aa;
+            transform: scale(1.1);
+        }
+        .step-dot.done {
+            background: #00c9a7;
+            border-color: #00c9a7;
+            color: #0a0f1e;
+        }
+        .step-line {
+            flex: 1;
+            height: 3px;
+            background: #1e3145;
+            align-self: center;
+            margin: 0 -5px;
+            z-index: 1;
+            border-radius: 5px;
+            transition: 0.5s;
+        }
+        .step-line.active {
+            background: linear-gradient(90deg, #f5c542, #ff9f1c);
+        }
+        .title-box {
+            text-align: center;
+            margin: 20px 0 5px;
+        }
+        .step-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        .step-desc {
+            color: #9bb0c9;
+            font-size: 14px;
+            margin-top: 4px;
+            min-height: 24px;
+            font-weight: 400;
+        }
+        .timer-ring {
+            background: #0c1624;
+            border-radius: 60px;
+            padding: 12px 15px;
+            margin: 18px 0;
+            border: 1px solid #2a3f5a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timer-text {
+            color: #d4e2f0;
+            font-size: 14px;
+        }
+        .timer-num {
+            color: #f5c542;
+            font-weight: 800;
+            font-size: 22px;
+            font-family: monospace;
+            min-width: 70px;
+            text-align: right;
+        }
+        .status-box {
+            background: #0b1422;
+            padding: 16px;
+            border-radius: 18px;
+            border-left: 4px solid #f5c542;
+            margin: 10px 0 18px;
+            font-size: 13px;
+            line-height: 2;
+            color: #b0c9dd;
+        }
+        .status-box span { color: #ffd966; font-weight: 700; }
+        .status-box .green { color: #4ade80; }
+        .btn {
+            background: linear-gradient(145deg, #f5c542, #e6a800);
+            border: none;
+            color: #0a0f1e;
+            font-weight: 800;
+            padding: 16px;
+            width: 100%;
+            border-radius: 60px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 8px 25px #f5c54233;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn:disabled {
+            background: #3a4a5e;
+            color: #7a8fa5;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #5a7290;
+            border-top: 1px solid #1e3145;
+            padding-top: 15px;
+        }
+        #logArea {
+            background: #050a12;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 12px;
+            color: #4a6a8a;
+            font-size: 11px;
+            max-height: 65px;
+            overflow-y: auto;
+            font-family: monospace;
+            border: 1px solid #1a2a3f;
+            display: none;
+        }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header">
+        <span>🔥 EN VI 4.0 PRO</span>
+        <span class="badge">🔒 Bảo mật cao</span>
+    </div>
+
+    <!-- 4 dấu chấm bước -->
+    <div class="step-visual" id="dotContainer">
+        <div class="step-dot active" id="dot1">1</div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-dot" id="dot2">2</div>
+        <div class="step-line" id="line2"></div>
+        <div class="step-dot" id="dot3">3</div>
+        <div class="step-line" id="line3"></div>
+        <div class="step-dot" id="dot4">4</div>
+    </div>
+
+    <div class="title-box">
+        <div class="step-title" id="stepTitle">🔐 Sẵn sàng</div>
+        <div class="step-desc" id="stepDesc">Nhấn nút bên dưới để bắt đầu quy trình xác thực</div>
+    </div>
+
+    <div class="timer-ring">
+        <span class="timer-text">⏳ Thời gian xử lý</span>
+        <span class="timer-num" id="timerDisplay">0s</span>
+    </div>
+
+    <div class="status-box" id="statusPanel">
+        <div>📊 Giới hạn: <span id="limitDisplay">2000 / 2000</span></div>
+        <div>🛡️ Mã xác thực: <span id="checkDisplay">16.4</span></div>
+        <div>📌 Bản đồ: <span>No1Share (85.0)</span></div>
+        <div>🔗 LinkTot: <span id="linktotDisplay">5/5 (70.0)</span></div>
+        <div>⚡ Bbmkts: <span id="bbmktsDisplay">1/1 (99+)</span></div>
+    </div>
+
+    <button class="btn" id="actionBtn">▶ BẮT ĐẦU XỬ LÝ</button>
+
+    <div class="footer">
+        <span>🟢 Trạng thái: <span id="statusText" style="color:#4ade80;">Chờ</span></span>
+        <span>🛡️ Phiên bản 2.4.1</span>
+    </div>
+
+    <div id="logArea"></div>
+</div>
+
+<script>
+    (function() {
+        // ===== CẤU HÌNH BẢO MẬT & LINK =====
+        const CONFIG = {
+            // ⬇️ THAY LINK NÀY BẰNG LINK ĐÍCH CỦA BẠN (PubCrypto)
+            TARGET_URL: "https://pub.cryptolinkforearn.com/go/your-link-here",
+            MAX_STEPS: 4,
+            MIN_DELAY: 8,   // Giây tối thiểu mỗi bước (làm như thật)
+            MAX_DELAY: 14   // Giây tối đa mỗi bước
+        };
+
+        // ===== BIẾN TRẠNG THÁI =====
+        let currentStep = 0;
+        let isRunning = false;
+        let timerInterval = null;
+        let countdown = 0;
+        const btn = document.getElementById('actionBtn');
+        const statusText = document.getElementById('statusText');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const stepTitle = document.getElementById('stepTitle');
+        const stepDesc = document.getElementById('stepDesc');
+        const limitDisplay = document.getElementById('limitDisplay');
+        const checkDisplay = document.getElementById('checkDisplay');
+        const linktotDisplay = document.getElementById('linktotDisplay');
+        const bbmktsDisplay = document.getElementById('bbmktsDisplay');
+        const logArea = document.getElementById('logArea');
+
+        // Mảng các bước mô tả
+        const STEPS = [
+            { title: '🔍 Bước 1/4', desc: 'Đang kiểm tra môi trường & IP...' },
+            { title: '🔐 Bước 2/4', desc: 'Xác thực chữ ký số & Captcha...' },
+            { title: '🔄 Bước 3/4', desc: 'Đồng bộ dữ liệu từ 5 nguồn...' },
+            { title: '✅ Bước 4/4', desc: 'Hoàn tất! Chuyển hướng an toàn...' }
+        ];
+
+        // Hàm log (debug)
+        function addLog(msg) {
+            logArea.style.display = 'block';
+            logArea.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        // Hàm cập nhật giao diện các dấu chấm
+        function updateDots(step) {
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.getElementById(`dot${i}`);
+                const line = document.getElementById(`line${i}`);
+                dot.className = 'step-dot';
+                if (i < step) { dot.classList.add('done'); }
+                else if (i === step) { dot.classList.add('active'); }
+                if (line) {
+                    line.className = 'step-line';
+                    if (i < step) line.classList.add('active');
+                }
+            }
+        }
+
+        // Hàm reset toàn bộ
+        function resetAll() {
+            if (timerInterval) clearInterval(timerInterval);
+            isRunning = false;
+            btn.disabled = false;
+            btn.textContent = '▶ BẮT ĐẦU XỬ LÝ';
+            statusText.innerText = 'Sẵn sàng';
+            statusText.style.color = '#4ade80';
+            timerDisplay.textContent = '0s';
+            stepTitle.textContent = '🔐 Sẵn sàng';
+            stepDesc.textContent = 'Nhấn nút để bắt đầu xác thực 4 bước';
+            updateDots(0);
+            // Reset chỉ số
+            limitDisplay.innerText = '2000 / 2000';
+            checkDisplay.innerText = '16.4';
+            linktotDisplay.innerText = '5/5 (70.0)';
+            bbmktsDisplay.innerText = '1/1 (99+)';
+            currentStep = 0;
+            addLog('🔄 Đã reset trạng thái.');
+        }
+
+        // Hàm chạy 1 bước
+        function runStep(stepIndex) {
+            if (stepIndex > CONFIG.MAX_STEPS) {
+                // Hoàn thành
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isRunning = false;
+                btn.disabled = false;
+                btn.textContent = '✅ ĐÃ HOÀN TẤT';
+                statusText.innerText = 'Thành công!';
+                statusText.style.color = '#4ade80';
+                stepTitle.textContent = '🎉 HOÀN TẤT!';
+                stepDesc.textContent = 'Bạn sẽ được chuyển hướng đến link đích.';
+                addLog('✅ Hoàn thành 4 bước. Chuyển hướng...');
+
+                // Chuyển hướng sau 1.5 giây
+                setTimeout(() => {
+                    window.location.href = CONFIG.TARGET_URL;
+                }, 1500);
+                return;
+            }
+
+            // Cập nhật giao diện cho bước hiện tại
+            const stepInfo = STEPS[stepIndex - 1];
+            stepTitle.textContent = stepInfo.title;
+            stepDesc.textContent = stepInfo.desc;
+            updateDots(stepIndex);
+
+            // Cập nhật số liệu ảo để giống thật
+            limitDisplay.innerText = `${1999 - (stepIndex * 3)} / 2000`;
+            checkDisplay.innerText = (16.4 + stepIndex * 1.2).toFixed(1);
+            linktotDisplay.innerText = `${5 - stepIndex}/5 (${70 - stepIndex * 5}.0)`;
+            bbmktsDisplay.innerText = `${stepIndex}/1 (99+)`;
+            addLog(`🔹 Bắt đầu bước ${stepIndex}: ${stepInfo.desc}`);
+
+            // random thời gian từ 8-14s
+            const delay = Math.floor(Math.random() * (CONFIG.MAX_DELAY - CONFIG.MIN_DELAY + 1)) + CONFIG.MIN_DELAY;
+            countdown = delay;
+            timerDisplay.textContent = `${countdown}s`;
+
+            // Đếm ngược
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                countdown--;
+                timerDisplay.textContent = `${countdown}s`;
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    // Chạy bước tiếp theo
+                    currentStep = stepIndex + 1;
+                    runStep(currentStep);
+                }
+            }, 1000);
+        }
+
+        // Sự kiện click nút
+        btn.addEventListener('click', function() {
+            if (isRunning) return;
+            if (btn.textContent === '✅ ĐÃ HOÀN TẤT') {
+                resetAll();
+                return;
+            }
+
+            // Bắt đầu
+            isRunning = true;
+            btn.disabled = true;
+            btn.textContent = '⏳ ĐANG XỬ LÝ...';
+            statusText.innerText = 'Đang chạy...';
+            statusText.style.color = '#f5c542';
+            addLog('🚀 Bắt đầu quy trình xác thực 4 bước...');
+
+            // Reset và bắt đầu từ bước 1
+            currentStep = 1;
+            runStep(currentStep);
+        });
+
+        // Nếu có lỗi timeout hay reset, thêm handler phòng hờ
+        window.onload = function() {
+            addLog('🟢 Hệ thống sẵn sàng. Chờ tương tác...');
+            resetAll();
+        };
+    })();
+</script>
+</body>
+          </html>
