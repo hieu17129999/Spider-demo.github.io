@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - LinkGate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🔗 LinkGate</div>
+        <div class="auth-box">
+            <div class="tabs">
+                <button id="loginTab" class="active">Đăng nhập</button>
+                <button id="registerTab">Đăng ký</button>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Đăng nhập</button>
+                    <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                </div>
+            </form>
+
+            <form id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label>Họ tên</label>
+                    <input type="text" id="registerName" placeholder="Nguyễn Văn A" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="registerPassword" placeholder="Tối thiểu 6 ký tự" required>
+                </div>
+                <button type="submit" class="btn-primary">Đăng ký</button>
+                <p class="note">Bằng cách đăng ký, bạn đồng ý với <a href="#">Điều khoản</a></p>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        // Chuyển hướng nếu đã đăng nhập
+        if (sessionStorage.getItem('currentUser')) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>
