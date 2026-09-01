@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rút tiền - LinkGate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="page-header">
+            <span class="back-btn" onclick="window.location.href='dashboard.html'">←</span>
+            <span class="page-title">💸 Rút tiền</span>
+        </header>
+
+        <!-- Form rút tiền -->
+        <div class="withdraw-form" style="padding:0 16px;">
+            <!-- Hiển thị số dư -->
+            <div style="background:#1e2636; padding:16px; border-radius:16px; margin-bottom:20px; text-align:center;">
+                <span style="color:#8a9bb5;">💰 Số dư hiện có</span>
+                <div style="font-size:28px; font-weight:700; color:#f0b90b;" id="withdrawBalance">0</div>
+                <span style="color:#5a6f8a; font-size:14px;">điểm</span>
+            </div>
+
+            <!-- Nhập số điểm -->
+            <div class="form-group">
+                <label>Số điểm muốn rút <span style="color:#5a6f8a; font-size:13px;">(tối thiểu 1000)</span></label>
+                <input type="number" id="withdrawPoints" placeholder="1000" min="1000" step="100">
+            </div>
+
+            <!-- Chọn phương thức -->
+            <div class="form-group">
+                <label>Phương thức</label>
+                <select id="withdrawMethod">
+                    <option value="bank">🏦 Chuyển khoản ngân hàng</option>
+                    <option value="paypal">💳 PayPal</option>
+                    <option value="crypto">🪙 Crypto (USDT)</option>
+                </select>
+            </div>
+
+            <!-- Thông tin nhận tiền -->
+            <div class="form-group">
+                <label>Thông tin nhận tiền</label>
+                <textarea id="withdrawDetails" placeholder="VD: Số tài khoản, tên ngân hàng, hoặc địa chỉ ví..." rows="3" style="width:100%; padding:14px; border-radius:14px; border:1px solid #2d3748; background:#0b0f17; color:#fff; font-size:16px; outline:none;"></textarea>
+            </div>
+
+            <!-- Nút gửi -->
+            <button id="withdrawBtn" class="btn-primary">📤 Gửi yêu cầu</button>
+
+            <!-- Thông báo -->
+            <div id="withdrawMessage" style="margin-top:15px; text-align:center; font-size:15px;"></div>
+        </div>
+
+        <!-- Thanh điều hướng -->
+        <footer class="nav-footer">
+            <a href="dashboard.html">🏠</a>
+            <a href="tasks.html">📋</a>
+            <a href="wallet.html">💰</a>
+            <a href="withdraw.html" class="active">💸</a>
+            <a href="admin.html" id="adminLink" style="display:none;">⚙️</a>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ========== KIỂM TRA ĐĂNG NHẬP ==========
+        const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+        if (user.role === 'admin') {
+            document.getElementById('adminLink').style.display = 'inline';
+        }
+
+        // ========== HIỂN THỊ SỐ DƯ ==========
+        document.getElementById('withdrawBalance').textContent = user.balance || 0;
+
+        // ========== XỬ LÝ RÚT TIỀN ==========
+        document.getElementById('withdrawBtn').addEventListener('click', function() {
+            const points = parseInt(document.getElementById('withdrawPoints').value);
+            const method = document.getElementById('withdrawMethod').value;
+            const details = document.getElementById('withdrawDetails').value.trim();
+            const message = document.getElementById('withdrawMessage');
+
+            // Kiểm tra số điểm
+            if (!points || points < 1000) {
+                message.innerHTML = '⚠️ Số điểm tối thiểu là 1000.';
+                message.style.color = '#f87171';
+                return;
+            }
+
+            if (points > (user.balance || 0)) {
+                message.innerHTML = `⚠️ Bạn chỉ có ${user.balance} điểm. Không đủ để rút.`;
+                message.style.color = '#f87171';
+                return;
+            }
+
+            if (!details) {
+                message.innerHTML = '⚠️ Vui lòng nhập thông tin nhận tiền.';
+                message.style.color = '#f87171';
+                return;
+            }
+
+            // ===== TẠO YÊU CẦU RÚT =====
+            // Lấy danh sách user
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const index = users.findIndex(u => u.email === user.email);
+            if (index === -1) {
+                message.innerHTML = '❌ Lỗi: Không tìm thấy tài khoản.';
+                message.style.color = '#f87171';
+                return;
+            }
+
+            // Trừ điểm
+            users[index].balance = (users[index].balance || 0) - points;
+
+            // Thêm giao dịch
+            if (!users[index].transactions) users[index].transactions = [];
+            users[index].transactions.push({
+                type: 'withdraw',
+                points: -points,
+                note: `Yêu cầu rút ${points} điểm qua ${method}`,
+                date: new Date().toLocaleString()
+            });
+
+            // Lưu yêu cầu vào danh sách admin
+            const withdrawals = JSON.parse(localStorage.getItem('withdrawals') || '[]');
+            withdrawals.push({
+                id: Date.now(),
+                userEmail: user.email,
+                userName: user.name,
+                points: points,
+                method: method,
+                details: details,
+                status: 'pending',
+                date: new Date().toLocaleString()
+            });
+
+            // Lưu lại tất cả
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
+
+            // Cập nhật session
+            sessionStorage.setItem('currentUser', JSON.stringify(users[index]));
+
+            // Hiển thị thông báo
+            message.innerHTML = `✅ Yêu cầu rút ${points} điểm đã được gửi! Chờ admin duyệt.`;
+            message.style.color = '#4ade80';
+
+            // Cập nhật số dư hiển thị
+            document.getElementById('withdrawBalance').textContent = users[index].balance;
+
+            // Reset form
+            document.getElementById('withdrawPoints').value = '';
+            document.getElementById('withdrawDetails').value = '';
+        });
+    </script>
+</body>
+</html>
