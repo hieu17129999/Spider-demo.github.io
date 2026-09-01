@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ví của tôi - LinkGate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="page-header">
+            <span class="back-btn" onclick="window.location.href='dashboard.html'">←</span>
+            <span class="page-title">💰 Ví của tôi</span>
+        </header>
+
+        <!-- Số dư -->
+        <div class="wallet-balance">
+            <span class="balance-label">Số dư hiện tại</span>
+            <span class="balance-value" id="walletBalance">0</span>
+            <span class="balance-unit">điểm</span>
+        </div>
+
+        <!-- Lịch sử giao dịch -->
+        <h3 style="color:#c8d6e5; margin:20px 16px 10px;">📜 Lịch sử giao dịch</h3>
+        <div id="transactionList" style="padding:0 16px;">
+            <!-- JS sẽ render -->
+        </div>
+
+        <!-- Thanh điều hướng -->
+        <footer class="nav-footer">
+            <a href="dashboard.html">🏠</a>
+            <a href="tasks.html">📋</a>
+            <a href="wallet.html" class="active">💰</a>
+            <a href="withdraw.html">💸</a>
+            <a href="admin.html" id="adminLink" style="display:none;">⚙️</a>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ========== KIỂM TRA ĐĂNG NHẬP ==========
+        const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+        if (user.role === 'admin') {
+            document.getElementById('adminLink').style.display = 'inline';
+        }
+
+        // ========== HIỂN THỊ SỐ DƯ ==========
+        document.getElementById('walletBalance').textContent = user.balance || 0;
+
+        // ========== HIỂN THỊ LỊCH SỬ GIAO DỊCH ==========
+        const transactionList = document.getElementById('transactionList');
+        const transactions = user.transactions || [];
+
+        if (transactions.length === 0) {
+            transactionList.innerHTML = `
+                <div style="background:#1e2636; padding:30px; border-radius:16px; text-align:center; color:#5a6f8a;">
+                    📭 Chưa có giao dịch nào.<br>
+                    Hãy hoàn thành nhiệm vụ để kiếm điểm!
+                </div>
+            `;
+        } else {
+            // Hiển thị từ mới nhất đến cũ nhất
+            transactionList.innerHTML = transactions.slice().reverse().map(tx => `
+                <div class="transaction-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #1e2636;">
+                    <div>
+                        <span style="font-weight:600; ${tx.type === 'earn' ? 'color:#4ade80;' : tx.type === 'withdraw' ? 'color:#f87171;' : 'color:#fbbf24;'}">
+                            ${tx.type === 'earn' ? '➕ Cộng' : tx.type === 'withdraw' ? '➖ Trừ' : '🔄 Hoàn'}
+                        </span>
+                        <span style="color:#8a9bb5; font-size:13px; display:block;">${tx.note}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="font-weight:700; ${tx.points > 0 ? 'color:#4ade80;' : 'color:#f87171;'}">
+                            ${tx.points > 0 ? '+' : ''}${tx.points} điểm
+                        </span>
+                        <span style="color:#5a6f8a; font-size:12px; display:block;">${tx.date || ''}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
