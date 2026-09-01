@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhiệm vụ - LinkGate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="page-header">
+            <span class="back-btn" onclick="window.location.href='dashboard.html'">←</span>
+            <span class="page-title">📋 Nhiệm vụ</span>
+        </header>
+
+        <!-- Danh sách nhiệm vụ -->
+        <div class="task-list" id="taskList">
+            <!-- JS sẽ render danh sách nhiệm vụ -->
+        </div>
+
+        <!-- Thanh điều hướng dưới cùng -->
+        <footer class="nav-footer">
+            <a href="dashboard.html">🏠</a>
+            <a href="tasks.html" class="active">📋</a>
+            <a href="wallet.html">💰</a>
+            <a href="withdraw.html">💸</a>
+            <a href="admin.html" id="adminLink" style="display:none;">⚙️</a>
+        </footer>
+    </div>
+
+    <!-- Dữ liệu nhiệm vụ -->
+    <script>
+        const tasks = [
+            {
+                id: 1,
+                name: "📄 Xem trang quảng cáo",
+                description: "Truy cập link, xem nội dung trong 60 giây",
+                points: 100,
+                duration: 60
+            },
+            {
+                id: 2,
+                name: "🔗 Link Gate",
+                description: "Hoàn thành link gate để nhận thưởng",
+                points: 250,
+                duration: 120
+            },
+            {
+                id: 3,
+                name: "📺 Xem video",
+                description: "Xem video quảng cáo 30 giây",
+                points: 150,
+                duration: 30
+            }
+        ];
+    </script>
+
+    <script src="script.js"></script>
+    <script>
+        // Kiểm tra đăng nhập
+        const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+
+        // Hiện link admin nếu là admin
+        if (user.role === 'admin') {
+            document.getElementById('adminLink').style.display = 'inline';
+        }
+
+        // Render danh sách nhiệm vụ
+        const taskList = document.getElementById('taskList');
+        taskList.innerHTML = tasks.map(task => `
+            <div class="task-item">
+                <h3>${task.name}</h3>
+                <p>${task.description}</p>
+                <p>+${task.points} điểm • ⏱️ ${task.duration} giây</p>
+                <div class="task-actions">
+                    <button class="btn-secondary" onclick="window.location.href='task-detail.html?id=${task.id}'">
+                        ▶ Bắt đầu
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    </script>
+</body>
+</html>
