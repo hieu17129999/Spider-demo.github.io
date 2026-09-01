@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LinkGate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="top-nav">
+            <span class="logo">🔗 LinkGate</span>
+            <span id="userName" class="user-name">User</span>
+        </header>
+
+        <!-- Thống kê -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">💰 Số dư</span>
+                <span class="stat-value" id="balanceDisplay">0</span>
+                <span class="stat-unit">điểm</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">📋 Nhiệm vụ hôm nay</span>
+                <span class="stat-value" id="todayTasks">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">✅ Đã hoàn thành</span>
+                <span class="stat-value" id="completedTasks">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">⏳ Chờ rút</span>
+                <span class="stat-value" id="pendingWithdrawals">0</span>
+            </div>
+        </div>
+
+        <!-- Nút hành động -->
+        <div class="quick-actions">
+            <button onclick="window.location.href='tasks.html'" class="btn-primary">📋 Nhận nhiệm vụ</button>
+            <button onclick="window.location.href='wallet.html'" class="btn-secondary">💰 Lịch sử</button>
+            <button onclick="window.location.href='withdraw.html'" class="btn-secondary">💸 Rút tiền</button>
+        </div>
+
+        <!-- Thanh điều hướng dưới cùng -->
+        <footer class="nav-footer">
+            <a href="dashboard.html" class="active">🏠</a>
+            <a href="tasks.html">📋</a>
+            <a href="wallet.html">💰</a>
+            <a href="withdraw.html">💸</a>
+            <a href="admin.html" id="adminLink" style="display:none;">⚙️</a>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Kiểm tra đăng nhập
+        const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('balanceDisplay').textContent = user.balance || 0;
+            // Hiện link admin nếu là admin
+            if (user.role === 'admin') {
+                document.getElementById('adminLink').style.display = 'inline';
+            }
+            // Thống kê giả (sẽ cập nhật sau)
+            document.getElementById('todayTasks').textContent = '3';
+            document.getElementById('completedTasks').textContent = '0';
+            document.getElementById('pendingWithdrawals').textContent = '0';
+        }
+    </script>
+</body>
+</html>
