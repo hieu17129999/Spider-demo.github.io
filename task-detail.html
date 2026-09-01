@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết nhiệm vụ - LinkGate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="page-header">
+            <span class="back-btn" onclick="window.location.href='tasks.html'">←</span>
+            <span class="page-title" id="taskTitle">Chi tiết nhiệm vụ</span>
+        </header>
+
+        <!-- Thông tin nhiệm vụ -->
+        <div id="taskDetail">
+            <div class="task-info" style="background:#1e2636; padding:16px; border-radius:16px; margin:0 16px;">
+                <p><strong>💰 Phần thưởng:</strong> <span id="taskPoints" style="color:#f0b90b;">0</span> điểm</p>
+                <p><strong>⏱️ Thời gian:</strong> <span id="taskDuration">0</span> giây</p>
+            </div>
+
+            <!-- Các bước hướng dẫn -->
+            <div class="steps" style="margin:20px 16px; background:#1e2636; padding:16px; border-radius:16px;">
+                <h4 style="color:#c8d6e5; margin-bottom:10px;">📌 Các bước thực hiện:</h4>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #2d3748;">
+                    <span style="background:#f0b90b; color:#0b0f17; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:700;">1</span>
+                    <span>Nhấn <strong>Bắt đầu</strong></span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #2d3748;">
+                    <span style="background:#2d3748; color:#fff; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:700;">2</span>
+                    <span>Truy cập <strong>trang nhiệm vụ</strong> (mở tab mới)</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #2d3748;">
+                    <span style="background:#2d3748; color:#fff; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:700;">3</span>
+                    <span>Hoàn thành yêu cầu và <strong>lấy mã xác minh</strong></span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0;">
+                    <span style="background:#2d3748; color:#fff; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:700;">4</span>
+                    <span>Nhập mã vào ô bên dưới để <strong>nhận điểm</strong></span>
+                </div>
+            </div>
+
+            <!-- Khu vực thao tác -->
+            <div class="task-actions" style="margin:0 16px;">
+                <button id="startBtn" class="btn-primary">▶ BẮT ĐẦU</button>
+                <div id="timerDisplay" style="text-align:center; font-size:24px; margin-top:12px; color:#f0b90b;">⏱️ 00:60</div>
+
+                <!-- Khu vực mã xác minh (ẩn ban đầu) -->
+                <div id="codeSection" style="display:none; margin-top:15px; background:#1e2636; padding:16px; border-radius:16px;">
+                    <p style="color:#c8d6e5;">🔑 Mã xác minh của bạn:</p>
+                    <div style="background:#0b0f17; padding:16px; border-radius:12px; text-align:center; font-size:28px; font-weight:700; letter-spacing:8px; color:#f0b90b; margin:10px 0;" id="verificationCode">
+                        ------
+                    </div>
+                    <p style="color:#c8d6e5; font-size:14px;">📝 Nhập mã để hoàn thành:</p>
+                    <input type="text" id="codeInput" placeholder="Nhập mã xác minh" style="width:100%; padding:14px; border-radius:14px; border:1px solid #2d3748; background:#0b0f17; color:#fff; font-size:18px; text-align:center; letter-spacing:4px; outline:none;">
+                    <button id="verifyBtn" class="btn-secondary" style="margin-top:10px;">✅ Xác nhận</button>
+                </div>
+
+                <!-- Kết quả -->
+                <div id="resultMessage" style="margin-top:15px; text-align:center; font-size:16px;"></div>
+            </div>
+        </div>
+
+        <!-- Thanh điều hướng -->
+        <footer class="nav-footer">
+            <a href="dashboard.html">🏠</a>
+            <a href="tasks.html" class="active">📋</a>
+            <a href="wallet.html">💰</a>
+            <a href="withdraw.html">💸</a>
+            <a href="admin.html" id="adminLink" style="display:none;">⚙️</a>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ========== KIỂM TRA ĐĂNG NHẬP ==========
+        const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        if (!user) {
+            window.location.href = 'index.html';
+        }
+        if (user.role === 'admin') {
+            document.getElementById('adminLink').style.display = 'inline';
+        }
+
+        // ========== LẤY ID NHIỆM VỤ TỪ URL ==========
+        const params = new URLSearchParams(window.location.search);
+        const taskId = parseInt(params.get('id'));
+
+        // Dữ liệu nhiệm vụ (copy từ tasks.html)
+        const tasks = [
+            { id: 1, name: "📄 Xem trang quảng cáo", description: "Truy cập link, xem nội dung trong 60 giây", points: 100, duration: 60 },
+            { id: 2, name: "🔗 Link Gate", description: "Hoàn thành link gate để nhận thưởng", points: 250, duration: 120 },
+            { id: 3, name: "📺 Xem video", description: "Xem video quảng cáo 30 giây", points: 150, duration: 30 }
+        ];
+
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) {
+            alert('Không tìm thấy nhiệm vụ!');
+            window.location.href = 'tasks.html';
+        }
+
+        // ========== HIỂN THỊ THÔNG TIN ==========
+        document.getElementById('taskTitle').textContent = task.name;
+        document.getElementById('taskPoints').textContent = task.points;
+        document.getElementById('taskDuration').textContent = task.duration;
+
+        // ========== LOGIC LINK-GATE ==========
+        let sessionId = null;
+        let code = '';
+        let timerInterval = null;
+        let isCompleted = false;
+
+        const startBtn = document.getElementById('startBtn');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const codeSection = document.getElementById('codeSection');
+        const verificationCode = document.getElementById('verificationCode');
+        const codeInput = document.getElementById('codeInput');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const resultMessage = document.getElementById('resultMessage');
+
+        // Bắt đầu nhiệm vụ
+        startBtn.addEventListener('click', function() {
+            if (isCompleted) {
+                alert('Bạn đã hoàn thành nhiệm vụ này!');
+                return;
+            }
+
+            // Tạo phiên và mã
+            sessionId = Date.now();
+            code = Math.random().toString(36).substr(2, 6).toUpperCase();
+
+            // Hiển thị mã
+            codeSection.style.display = 'block';
+            verificationCode.textContent = code;
+            this.disabled = true;
+            this.textContent = '⏳ Đã bắt đầu';
+
+            // Mở link nhiệm vụ (giả lập link PubCrypto)
+            const targetUrl = `https://pub.cryptolinkforearn.com/go/task${task.id}`;
+            alert(`📌 Bước 2: Truy cập trang nhiệm vụ!\nLink: ${targetUrl}`);
+            window.open(targetUrl, '_blank');
+
+            // Bắt đầu đếm ngược
+            let seconds = task.duration;
+            timerDisplay.textContent = `⏱️ ${String(seconds).padStart(2, '0')}:${String(0).padStart(2, '0')}`;
+
+            timerInterval = setInterval(() => {
+                seconds--;
+                const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+                const sec = String(seconds % 60).padStart(2, '0');
+                timerDisplay.textContent = `⏱️ ${min}:${sec}`;
+
+                if (seconds <= 0) {
+                    clearInterval(timerInterval);
+                    resultMessage.innerHTML = '⏰ Hết thời gian! Hãy thử lại.';
+                    resultMessage.style.color = '#f87171';
+                    startBtn.disabled = false;
+                    startBtn.textContent = '▶ BẮT ĐẦU';
+                    codeSection.style.display = 'none';
+                }
+            }, 1000);
+
+            // Xử lý xác nhận mã
+            verifyBtn.onclick = function() {
+                const inputCode = codeInput.value.trim().toUpperCase();
+                if (inputCode === code) {
+                    clearInterval(timerInterval);
+                    // Cộng điểm
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const index = users.findIndex(u => u.email === user.email);
+                    if (index !== -1) {
+                        users[index].balance = (users[index].balance || 0) + task.points;
+                        if (!users[index].transactions) users[index].transactions = [];
+                        users[index].transactions.push({
+                            type: 'earn',
+                            points: task.points,
+                            note: `Hoàn thành nhiệm vụ #${task.id}`,
+                            date: new Date().toLocaleString()
+                        });
+                        localStorage.setItem('users', JSON.stringify(users));
+                        sessionStorage.setItem('currentUser', JSON.stringify(users[index]));
+                    }
+                    isCompleted = true;
+                    resultMessage.innerHTML = `✅ Thành công! Bạn nhận được +${task.points} điểm.`;
+                    resultMessage.style.color = '#4ade80';
+                    codeSection.style.display = 'none';
+                    startBtn.disabled = false;
+                    startBtn.textContent = '✅ Đã hoàn thành';
+                    timerDisplay.textContent = '🎉 Hoàn tất!';
+                } else {
+                    resultMessage.innerHTML = '❌ Mã sai. Vui lòng thử lại.';
+                    resultMessage.style.color = '#f87171';
+                    codeInput.value = '';
+                    codeInput.focus();
+                }
+            };
+        });
+    </script>
+</body>
+          </html>
