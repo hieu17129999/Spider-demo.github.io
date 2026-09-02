@@ -1,5 +1,8 @@
+// ===== CẤU HÌNH API (THAY LINK BACKEND CỦA BẠN) =====
+const API_BASE = 'https://linkgate-backend.onrender.com/api'; // ← DÒNG NÀY QUAN TRỌNG
+
 // ========================================
-// 1. CHUYỂN ĐỔI GIỮA TAB ĐĂNG NHẬP / ĐĂNG KÝ
+// 1. CHUYỂN ĐỔI TAB ĐĂNG NHẬP / ĐĂNG KÝ
 // ========================================
 
 const loginTab = document.getElementById('loginTab');
@@ -7,7 +10,6 @@ const registerTab = document.getElementById('registerTab');
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 
-// Khi bấm tab Đăng nhập
 loginTab.addEventListener('click', () => {
   loginTab.classList.add('active');
   registerTab.classList.remove('active');
@@ -15,7 +17,6 @@ loginTab.addEventListener('click', () => {
   registerForm.style.display = 'none';
 });
 
-// Khi bấm tab Đăng ký
 registerTab.addEventListener('click', () => {
   registerTab.classList.add('active');
   loginTab.classList.remove('active');
@@ -24,18 +25,16 @@ registerTab.addEventListener('click', () => {
 });
 
 // ========================================
-// 2. XỬ LÝ ĐĂNG KÝ (Lưu vào localStorage)
+// 2. XỬ LÝ ĐĂNG KÝ (GỌI API)
 // ========================================
 
-registerForm.addEventListener('submit', (e) => {
-  e.preventDefault(); // Ngăn reload trang
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-  // Lấy dữ liệu từ ô nhập
   const name = document.getElementById('registerName').value.trim();
   const email = document.getElementById('registerEmail').value.trim();
   const password = document.getElementById('registerPassword').value.trim();
 
-  // Kiểm tra nhập đủ chưa
   if (!name || !email || !password) {
     alert('Vui lòng điền đầy đủ thông tin.');
     return;
@@ -45,41 +44,29 @@ registerForm.addEventListener('submit', (e) => {
     return;
   }
 
-  // Lấy danh sách user đã có (giả lập database)
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  try {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
 
-  // Kiểm tra email đã tồn tại chưa
-  if (users.find(u => u.email === email)) {
-    alert('Email đã được đăng ký. Vui lòng đăng nhập.');
-    return;
+    alert('Đăng ký thành công! Bạn có thể đăng nhập ngay.');
+    loginTab.click();
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = '';
+  } catch (error) {
+    alert(error.message);
   }
-
-  // Thêm user mới
-  users.push({
-    name: name,
-    email: email,
-    password: password, // ⚠️ Demo: chưa hash
-    balance: 0,
-    transactions: [],
-    role: 'user'
-  });
-
-  // Lưu lại
-  localStorage.setItem('users', JSON.stringify(users));
-
-  alert('Đăng ký thành công! Bạn có thể đăng nhập ngay.');
-
-  // Chuyển sang tab đăng nhập và điền sẵn email
-  loginTab.click();
-  document.getElementById('loginEmail').value = email;
-  document.getElementById('loginPassword').value = '';
 });
 
 // ========================================
-// 3. XỬ LÝ ĐĂNG NHẬP
+// 3. XỬ LÝ ĐĂNG NHẬP (GỌI API)
 // ========================================
 
-loginForm.addEventListener('submit', (e) => {
+loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const email = document.getElementById('loginEmail').value.trim();
@@ -90,15 +77,40 @@ loginForm.addEventListener('submit', (e) => {
     return;
   }
 
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  const user = users.find(u => u.email === email && u.password === password);
+  try {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
 
-  if (!user) {
-    alert('Sai email hoặc mật khẩu. Vui lòng thử lại.');
-    return;
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+    alert(`Chào mừng ${data.user.name}! Chuyển đến Dashboard.`);
+    window.location.href = 'dashboard.html';
+  } catch (error) {
+    alert(error.message);
   }
-
-  sessionStorage.setItem('currentUser', JSON.stringify(user));
-  alert(`Chào mừng ${user.name}! Chuyển đến Dashboard.`);
-  window.location.href = 'dashboard.html';
 });
+
+// ========================================
+// 4. HÀM HỖ TRỢ (Lấy token và user)
+// ========================================
+
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+function getCurrentUser() {
+  const data = localStorage.getItem('currentUser');
+  return data ? JSON.parse(data) : null;
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('currentUser');
+  window.location.href = 'index.html';
+}
